@@ -1,0 +1,50 @@
+version: '3.1'
+services:
+  app:
+    container_name: kakfa-demo
+    image: kakfa-demo
+    build: ./
+    ports:
+      - "8080:8080"
+    depends_on:
+      dbpostgresql:
+        condition: service_started
+      kafka:
+        condition: service_started
+  dbpostgresql:
+    image: postgres
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_PASSWORD=1997
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=github_repo
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    hostname: zookeeper
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+      - 9092:9092
+    expose:
+      - 29092
+    depends_on:
+      zookeeper:
+        condition: service_started
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:29092,OUTSIDE://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_BROKER_ID: 1
+    restart: always
+

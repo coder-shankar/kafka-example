@@ -16,8 +16,6 @@ public class KafkaProducer implements CommandLineRunner  {
     private KafkaTemplate<String, String> kafkaTemplate;
 
 
-
-
     @SneakyThrows
     public void run() {
         for (int i = 0; i < 40; i++) {
